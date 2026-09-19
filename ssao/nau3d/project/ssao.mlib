@@ -1,0 +1,137 @@
+<?xml version="1.0" ?>
+<materialLib name="SSAO">
+
+	<renderTargets>
+		<renderTarget name="gBuffer">
+			<SIZE width=1920 height=1080 />
+			<CLEAR_VALUES r=0.0 g=0.0 b=0.0 a=0.0 />
+			<colors>
+				<color name="gPosition" internalFormat="RGBA16F" />
+				<color name="gNormal" internalFormat="RGBA16F" />
+			</colors>
+			<depth name="gDepth" internalFormat="DEPTH_COMPONENT32F" />
+		</renderTarget>
+
+		<renderTarget name="ssaoRaw">
+			<SIZE width=1920 height=1080 />
+			<CLEAR_VALUES r=1.0 g=1.0 b=1.0 a=1.0 />
+			<colors>
+				<color name="ssaoRawMap" internalFormat="RGBA16F" />
+			</colors>
+		</renderTarget>
+
+		<renderTarget name="ssaoBlurred">
+			<SIZE width=1920 height=1080 />
+			<CLEAR_VALUES r=1.0 g=1.0 b=1.0 a=1.0 />
+			<colors>
+				<color name="ssaoBlurredMap" internalFormat="RGBA16F" />
+			</colors>
+		</renderTarget>
+	</renderTargets>
+
+	<states>
+		<state name="noCull">
+			<CULL_FACE value="false" />
+		</state>
+	</states>
+
+	<shaders>
+		<shader name="room" vs="shaders/room.vert" ps="shaders/gbuffer.frag" />
+		<shader name="backpack" vs="shaders/backpack.vert" ps="shaders/gbuffer.frag" />
+		<shader name="ssao" vs="shaders/quad.vert" ps="shaders/ssao.frag" />
+		<shader name="blur" vs="shaders/quad.vert" ps="shaders/blur.frag" />
+		<shader name="lighting" vs="shaders/quad.vert" ps="shaders/lighting.frag" />
+	</shaders>
+
+	<materials>
+		<material name="room">
+			<shader name="room">
+				<values>
+					<valueof uniform="PVM" type="RENDERER" context="CURRENT" component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="VM" type="RENDERER" context="CURRENT" component="VIEW_MODEL" />
+					<valueof uniform="NormalMatrix" type="RENDERER" context="CURRENT" component="NORMAL" />
+				</values>
+			</shader>
+			<state name="noCull" />
+		</material>
+
+		<material name="backpack">
+			<shader name="backpack">
+				<values>
+					<valueof uniform="PVM" type="RENDERER" context="CURRENT" component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="VM" type="RENDERER" context="CURRENT" component="VIEW_MODEL" />
+					<valueof uniform="NormalMatrix" type="RENDERER" context="CURRENT" component="NORMAL" />
+				</values>
+			</shader>
+			<state name="noCull" />
+		</material>
+
+		<material name="ssao">
+			<shader name="ssao">
+				<values>
+					<valueof uniform="projection" type="CAMERA" context="MainCamera" component="PROJECTION_MATRIX" />
+					<valueof uniform="radius" type="RENDERER" context="CURRENT" component="radius" />
+					<valueof uniform="bias" type="RENDERER" context="CURRENT" component="bias" />
+					<valueof uniform="power" type="RENDERER" context="CURRENT" component="power" />
+					<valueof uniform="kernelSize" type="RENDERER" context="CURRENT" component="kernelSize" />
+					<valueof uniform="gPosition" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=0 />
+					<valueof uniform="gNormal" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=1 />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="gPosition">
+					<MAG_FILTER value="NEAREST" />
+					<MIN_FILTER value="NEAREST" />
+				</texture>
+				<texture UNIT=1 name="gNormal">
+					<MAG_FILTER value="NEAREST" />
+					<MIN_FILTER value="NEAREST" />
+				</texture>
+			</textures>
+		</material>
+
+		<material name="blur">
+			<shader name="blur">
+				<values>
+					<valueof uniform="ssaoInput" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=0 />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="ssaoRawMap">
+					<MAG_FILTER value="NEAREST" />
+					<MIN_FILTER value="NEAREST" />
+				</texture>
+			</textures>
+		</material>
+
+		<material name="lighting">
+			<shader name="lighting">
+				<values>
+					<valueof uniform="view" type="CAMERA" context="MainCamera" component="VIEW_MATRIX" />
+					<valueof uniform="lightPosition" type="LIGHT" context="PointLight" component="POSITION" />
+					<valueof uniform="lightColor" type="LIGHT" context="PointLight" component="COLOR" />
+					<valueof uniform="lightLinear" type="LIGHT" context="PointLight" component="LINEAR_ATT" />
+					<valueof uniform="lightQuadratic" type="LIGHT" context="PointLight" component="QUADRATIC_ATT" />
+					<valueof uniform="gPosition" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=0 />
+					<valueof uniform="gNormal" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=1 />
+					<valueof uniform="ssao" type="TEXTURE_BINDING" context="CURRENT" component="UNIT" id=2 />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="gPosition">
+					<MAG_FILTER value="NEAREST" />
+					<MIN_FILTER value="NEAREST" />
+				</texture>
+				<texture UNIT=1 name="gNormal">
+					<MAG_FILTER value="NEAREST" />
+					<MIN_FILTER value="NEAREST" />
+				</texture>
+				<texture UNIT=2 name="ssaoBlurredMap">
+					<MAG_FILTER value="NEAREST" />
+					<MIN_FILTER value="NEAREST" />
+				</texture>
+			</textures>
+		</material>
+	</materials>
+
+</materialLib>

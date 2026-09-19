@@ -1,0 +1,247 @@
+<?xml version="1.0"?>
+<project version="2">
+	<pipeline>
+		<pass name="G-Buffer Room" type="shader" active="true">
+			<shader type="vs" path="shaders/room.vert" entry="main" />
+			<shader type="ps" path="shaders/gbuffer.frag" entry="main" />
+			<rendertexture name="gPosition" />
+			<rendertexture name="gNormal" />
+			<items>
+				<item name="RoomRaster" type="renderstate">
+					<wireframe>false</wireframe>
+					<cull>false</cull>
+					<ccw>true</ccw>
+					<depthtest>true</depthtest>
+					<depthclamp>false</depthclamp>
+					<depthmask>true</depthmask>
+					<depthfunc>Less</depthfunc>
+					<depthbias>0</depthbias>
+				</item>
+				<item name="RoomBox" type="geometry">
+					<type>Cube</type>
+					<width>15</width>
+					<height>15</height>
+					<depth>15</depth>
+					<y>7</y>
+					<topology>TriangleList</topology>
+				</item>
+			</items>
+			<itemvalues />
+			<variables>
+				<variable type="float4x4" name="matProjection" function="MatrixPerspectiveFovLH">
+					<row>
+						<value>1.0471976</value>
+						<value>1.7777778</value>
+						<value>0.1</value>
+						<value>100</value>
+					</row>
+				</variable>
+				<variable type="float4x4" name="matView" system="View" />
+				<variable type="float4x4" name="matGeo" system="GeometryTransform" />
+			</variables>
+			<macros />
+		</pass>
+
+		<pass name="G-Buffer Backpack" type="shader" active="true">
+			<shader type="vs" path="shaders/backpack.vert" entry="main" />
+			<shader type="ps" path="shaders/gbuffer.frag" entry="main" />
+			<rendertexture name="gPosition" />
+			<rendertexture name="gNormal" />
+			<items>
+				<item name="BackpackRaster" type="renderstate">
+					<wireframe>false</wireframe>
+					<cull>false</cull>
+					<ccw>true</ccw>
+					<depthtest>true</depthtest>
+					<depthclamp>false</depthclamp>
+					<depthmask>true</depthmask>
+					<depthfunc>Less</depthfunc>
+					<depthbias>0</depthbias>
+				</item>
+				<item name="Backpack" type="model">
+					<filepath>backpack.obj</filepath>
+					<grouponly>false</grouponly>
+					<y>0.5</y>
+					<pitch>-1.5707963</pitch>
+				</item>
+			</items>
+			<itemvalues />
+			<variables>
+				<variable type="float4x4" name="matProjection" function="MatrixPerspectiveFovLH">
+					<row>
+						<value>1.0471976</value>
+						<value>1.7777778</value>
+						<value>0.1</value>
+						<value>100</value>
+					</row>
+				</variable>
+				<variable type="float4x4" name="matView" system="View" />
+				<variable type="float4x4" name="matGeo" system="GeometryTransform" />
+			</variables>
+			<macros />
+		</pass>
+
+		<pass name="SSAO" type="shader" active="true">
+			<shader type="vs" path="shaders/quad.vert" entry="main" />
+			<shader type="ps" path="shaders/ssao.frag" entry="main" />
+			<rendertexture name="ssaoRaw" />
+			<items>
+				<item name="SSAOQuad" type="geometry">
+					<type>ScreenQuadNDC</type>
+					<width>1</width>
+					<height>1</height>
+					<depth>1</depth>
+					<topology>TriangleList</topology>
+				</item>
+			</items>
+			<itemvalues />
+			<variables>
+				<variable type="float4x4" name="matProjection" function="MatrixPerspectiveFovLH">
+					<row>
+						<value>1.0471976</value>
+						<value>1.7777778</value>
+						<value>0.1</value>
+						<value>100</value>
+					</row>
+				</variable>
+				<variable type="float" name="radius">
+					<row>
+						<value>0.5</value>
+					</row>
+				</variable>
+				<variable type="float" name="bias">
+					<row>
+						<value>0.025</value>
+					</row>
+				</variable>
+				<variable type="float" name="power">
+					<row>
+						<value>1.5</value>
+					</row>
+				</variable>
+				<variable type="int" name="kernelSize">
+					<row>
+						<value>8</value>
+					</row>
+				</variable>
+			</variables>
+			<macros />
+		</pass>
+
+		<pass name="Blur" type="shader" active="true">
+			<shader type="vs" path="shaders/quad.vert" entry="main" />
+			<shader type="ps" path="shaders/blur.frag" entry="main" />
+			<rendertexture name="ssaoBlurred" />
+			<items>
+				<item name="BlurQuad" type="geometry">
+					<type>ScreenQuadNDC</type>
+					<width>1</width>
+					<height>1</height>
+					<depth>1</depth>
+					<topology>TriangleList</topology>
+				</item>
+			</items>
+			<itemvalues />
+			<variables />
+			<macros />
+		</pass>
+
+		<pass name="Lighting" type="shader" active="true">
+			<shader type="vs" path="shaders/quad.vert" entry="main" />
+			<shader type="ps" path="shaders/lighting.frag" entry="main" />
+			<rendertexture name="lit" />
+			<items>
+				<item name="LightingQuad" type="geometry">
+					<type>ScreenQuadNDC</type>
+					<width>1</width>
+					<height>1</height>
+					<depth>1</depth>
+					<topology>TriangleList</topology>
+				</item>
+			</items>
+			<itemvalues />
+			<variables>
+				<variable type="float4x4" name="matView" system="View" />
+				<variable type="float3" name="lightPosition">
+					<row>
+						<value>2</value>
+						<value>4</value>
+						<value>-2</value>
+					</row>
+				</variable>
+				<variable type="float3" name="lightColor">
+					<row>
+						<value>0.9</value>
+						<value>0.2</value>
+						<value>0.2</value>
+					</row>
+				</variable>
+				<variable type="float" name="lightLinear">
+					<row>
+						<value>0.09</value>
+					</row>
+				</variable>
+				<variable type="float" name="lightQuadratic">
+					<row>
+						<value>0.032</value>
+					</row>
+				</variable>
+			</variables>
+			<macros />
+		</pass>
+
+		<pass name="Present" type="shader" active="true">
+			<shader type="vs" path="shaders/quad.vert" entry="main" />
+			<shader type="ps" path="shaders/present.frag" entry="main" />
+			<rendertexture />
+			<items>
+				<item name="PresentQuad" type="geometry">
+					<type>ScreenQuadNDC</type>
+					<width>1</width>
+					<height>1</height>
+					<depth>1</depth>
+					<topology>TriangleList</topology>
+				</item>
+			</items>
+			<itemvalues />
+			<variables />
+			<macros />
+		</pass>
+	</pipeline>
+
+	<objects>
+		<object type="rendertexture" name="gPosition" format="R16G16B16A16_FLOAT" fsize="1920,1080" clear="true" r="0" g="0" b="0" a="0">
+			<bind slot="0" name="SSAO" />
+			<bind slot="0" name="Lighting" />
+		</object>
+		<object type="rendertexture" name="gNormal" format="R16G16B16A16_FLOAT" fsize="1920,1080" clear="true" r="0" g="0" b="0" a="0">
+			<bind slot="1" name="SSAO" />
+			<bind slot="1" name="Lighting" />
+		</object>
+		<object type="rendertexture" name="ssaoRaw" format="R16G16B16A16_FLOAT" fsize="1920,1080" clear="true" r="1" g="1" b="1" a="1">
+			<bind slot="0" name="Blur" />
+		</object>
+		<object type="rendertexture" name="ssaoBlurred" format="R16G16B16A16_FLOAT" fsize="1920,1080" clear="true" r="1" g="1" b="1" a="1">
+			<bind slot="2" name="Lighting" />
+		</object>
+		<object type="rendertexture" name="lit" format="R8G8B8A8" fsize="1920,1080" clear="true" r="0.05" g="0.05" b="0.05" a="1">
+			<bind slot="0" name="Present" />
+		</object>
+	</objects>
+
+	<cameras />
+
+	<settings>
+		<entry type="camera" fp="true">
+			<positionX>3.5</positionX>
+			<positionY>2</positionY>
+			<positionZ>-3</positionZ>
+			<yaw>125.537678</yaw>
+			<pitch>-19.225856</pitch>
+		</entry>
+		<entry type="clearcolor" r="0.05" g="0.05" b="0.05" a="1" />
+		<entry type="usealpha" val="false" />
+	</settings>
+
+	<plugindata />
+</project>
