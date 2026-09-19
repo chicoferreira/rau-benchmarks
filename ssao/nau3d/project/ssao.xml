@@ -1,0 +1,90 @@
+<?xml version="1.0" ?>
+<project name="SSAO" width=1920 height=1080>
+	<assets>
+		<attributes>
+			<attribute type="RENDERER" name="radius" data="FLOAT" value=0.5 />
+			<attribute type="RENDERER" name="bias" data="FLOAT" value=0.025 />
+			<attribute type="RENDERER" name="power" data="FLOAT" value=1.5 />
+			<attribute type="RENDERER" name="kernelSize" data="UINT" value=8 />
+		</attributes>
+
+		<scenes>
+			<scene name="Room">
+				<geometry name="RoomBox" type="BOX" material="room">
+					<TRANSLATE x=0.0 y=7.0 z=0.0 />
+					<SCALE x=7.5 y=7.5 z=7.5 />
+				</geometry>
+			</scene>
+			<scene name="Backpack">
+				<TRANSLATE x=0.0 y=0.5 z=0.0 />
+				<ROTATE x=1.0 y=0.0 z=0.0 w=-90.0 />
+				<file name="backpack.obj" />
+			</scene>
+		</scenes>
+
+		<viewports>
+			<viewport name="MainViewport">
+				<SIZE width=1920 height=1080 />
+				<CLEAR_COLOR r=0.05 g=0.05 b=0.05 />
+			</viewport>
+		</viewports>
+
+		<cameras>
+			<camera name="MainCamera">
+				<viewport name="MainViewport" />
+				<projection TYPE="PERSPECTIVE" FOV=60.0 NEAR=0.1 FAR=100.0 />
+				<POSITION x=3.5 y=2.0 z=-3.0 />
+				<VIEW x=-3.5 y=-1.5 z=2.5 />
+				<UP x=0.0 y=1.0 z=0.0 />
+			</camera>
+		</cameras>
+
+		<lights>
+			<light name="PointLight">
+				<POSITION x=2.0 y=4.0 z=-2.0 />
+				<COLOR r=0.9 g=0.2 b=0.2 />
+				<LINEAR_ATT value=0.09 />
+				<QUADRATIC_ATT value=0.032 />
+			</light>
+		</lights>
+
+		<materialLibs>
+			<materialLib filename="ssao.mlib" />
+		</materialLibs>
+	</assets>
+
+	<pipelines>
+		<pipeline name="SSAO" defaultCamera="MainCamera">
+			<pass class="default" name="G-Buffer">
+				<scenes>
+					<scene name="Room" />
+					<scene name="Backpack" />
+				</scenes>
+				<camera name="MainCamera" />
+				<viewport name="MainViewport" />
+				<renderTarget name="gBuffer" fromLibrary="SSAO" />
+				<materialMaps>
+					<map fromMaterial="room" toLibrary="SSAO" toMaterial="room" />
+					<map fromMaterial="Scene_-_Root" toLibrary="SSAO" toMaterial="backpack" />
+				</materialMaps>
+			</pass>
+
+			<pass class="quad" name="SSAO">
+				<viewport name="MainViewport" />
+				<renderTarget name="ssaoRaw" fromLibrary="SSAO" />
+				<material name="ssao" fromLibrary="SSAO" />
+			</pass>
+
+			<pass class="quad" name="Blur">
+				<viewport name="MainViewport" />
+				<renderTarget name="ssaoBlurred" fromLibrary="SSAO" />
+				<material name="blur" fromLibrary="SSAO" />
+			</pass>
+
+			<pass class="quad" name="Lighting">
+				<viewport name="MainViewport" />
+				<material name="lighting" fromLibrary="SSAO" />
+			</pass>
+		</pipeline>
+	</pipelines>
+</project>
