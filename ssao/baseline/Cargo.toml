@@ -1,0 +1,22 @@
+[package]
+name = "ssao-baseline"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "ssao-baseline"
+path = "src/main.rs"
+
+[dependencies]
+bytemuck = { version = "1.24.0", features = ["derive"] }
+glam = "0.33.0"
+mimalloc = "0.1.52"
+pollster = "1.0.1"
+tobj = "4.0.3"
+wgpu = "30.0"
+winit = "0.30"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
